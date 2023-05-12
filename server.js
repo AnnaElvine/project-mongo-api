@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 // import booksData from "./data/books.json";
 // import goldenGlobesData from "./data/golden-globes.json";
 // import netflixData from "./data/netflix-titles.json";
-// import topMusicData from "./data/top-music.json";
+import topMusicData from "./data/top-music.json";
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-mongo";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -25,10 +25,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Start defining your routes here
-app.get("/", (req, res) => {
-  res.send("Hello Technigo!");
-});
 const { Schema } = mongoose;
 const userSchema = new Schema ({
   name: String,
@@ -37,26 +33,68 @@ const userSchema = new Schema ({
 });
 
 const User = mongoose.model("User", userSchema);
-
 const songSchema = new Schema({
-    id: Number,
-    trackName: String,
-    artistName: String,
-    genre: String,
-    bpm: Number,
-    energy: Number,
-    danceability: Number,
-    loudness: Number,
-    liveness: Number,
-    valence: Number,
-    length: Number,
-    acousticness: Number,
-    speechiness: Number,
-    popularity: Number
+  id: Number,
+  trackName: String,
+  artistName: String,
+  genre: String,
+  bpm: Number,
+  energy: Number,
+  danceability: Number,
+  loudness: Number,
+  liveness: Number,
+  valence: Number,
+  length: Number,
+  acousticness: Number,
+  speechiness: Number,
+  popularity: Number
 })
 
 const Song = mongoose.model("Song", songSchema);
 
+if (process.env.RESET_DB) {
+  const resetDatabase = async () => {
+    await Song.deleteMany();
+    topMusicData.forEach((singleSong) => {
+      const newSong = new Song(singleSong);
+      newSong.save()
+    })
+  }
+  resetDatabase();
+  // call a function while declaring it - extra curriculum 
+}
+
+// Start defining your routes here
+app.get("/", (req, res) => {
+  res.send("Hey music lover!");
+});
+
+
+app.get("/songs", async (req, res) => {
+  const {genre, danceability } = req.query;
+  const response = {
+    success: true,
+    body:{}
+  }
+  const genreRegex = new RegExp(genre);
+  const danceabilityRegex = new RegExp(danceability);
+
+  try {
+    response.body = await Song.find({genre: genreRegex, danceability: danceability})
+    if (true) {
+      res.status(200).json(response)
+    } else {
+      res.status(404).json({
+        success: false,
+        body: {
+          message: "Song not found"
+        }
+      })
+    }
+  } catch(e) {
+    res.status(500).json(response)
+  }
+});
 
 
 app.get("/songs/id/:id", async (req, res) => {
@@ -71,7 +109,7 @@ app.get("/songs/id/:id", async (req, res) => {
       res.status(404).json({
         success: false,
         body: {
-          message: "Song not found"
+          message: "Song not found :("
         }
       })
     }
