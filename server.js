@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 // import goldenGlobesData from "./data/golden-globes.json";
 // import netflixData from "./data/netflix-titles.json";
 import topMusicData from "./data/top-music.json";
+import listEndpoints from "express-list-endpoints";
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-mongo";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -20,6 +21,7 @@ mongoose.Promise = Promise;
 // PORT=9000 npm start
 const port = process.env.PORT || 8080;
 const app = express();
+
 
 // Add middlewares to enable cors and json body parsing
 app.use(cors());
@@ -66,7 +68,8 @@ if (process.env.RESET_DB) {
 
 // Start defining your routes here
 app.get("/", (req, res) => {
-  res.send("Hey music lover!");
+  /* res.send("Hey music lover!"); */
+  res.json(listEndpoints(app));
 });
 
 
