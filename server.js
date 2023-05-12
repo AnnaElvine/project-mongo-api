@@ -69,10 +69,11 @@ if (process.env.RESET_DB) {
 // Start defining your routes here
 app.get("/", (req, res) => {
   /* res.send("Hey music lover!"); */
-  res.json(listEndpoints(app));
+  res.json(listEndpoints(app)); /*  */
+
 });
 
-
+/* this is an endpoint */
 app.get("/songs", async (req, res) => {
   const {genre, danceability } = req.query;
   const response = {
@@ -80,20 +81,13 @@ app.get("/songs", async (req, res) => {
     body:{}
   }
   const genreRegex = new RegExp(genre);
-  const danceabilityRegex = new RegExp(danceability);
+  const danceabilityQuery = danceability ? danceability : {$gt: 0, $lt: 100};
 
   try {
-    response.body = await Song.find({genre: genreRegex, danceability: danceability})
-    if (true) {
+    response.body = await Song.find({genre: genreRegex, danceability: danceabilityQuery})
+    
       res.status(200).json(response)
-    } else {
-      res.status(404).json({
-        success: false,
-        body: {
-          message: "Song not found"
-        }
-      })
-    }
+
   } catch(e) {
     res.status(500).json(response)
   }
